@@ -12,25 +12,28 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (curl for healthchecks)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency specifications and install
-COPY requirements.txt pyproject.toml ./
+# 1. Install base dependencies from requirements.txt
+COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -r requirements.txt
 
-# Create persistent data directory and copy initial pre-seeded database
+# 2. Copy package definitions and install local package
+COPY README.md pyproject.toml ./
+COPY src/ ./src/
+RUN pip install --no-cache-dir -e . || true
+
+# 3. Create persistent data directory and copy pre-seeded database
 RUN mkdir -p /app/data
 COPY plm_mock.db /app/data/plm_mock.db
 
-# Copy all root Python modules (including validators.py, windchill_mapper.py, seed_data.py)
+# 4. Copy all root Python modules and SQL schemas
 COPY *.py ./
 COPY *.sql ./
-COPY src/ ./src/
 
 EXPOSE 8000
 

@@ -16,6 +16,17 @@ Constraints:
 - CORS configured for http://localhost:5173.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure application root directory and src/ are in sys.path
+_APP_ROOT = str(Path(__file__).resolve().parent)
+if _APP_ROOT not in sys.path:
+    sys.path.insert(0, _APP_ROOT)
+_SRC_DIR = str(Path(__file__).resolve().parent / "src")
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
+
 import datetime
 import math
 import os
