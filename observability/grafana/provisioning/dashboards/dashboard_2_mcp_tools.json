@@ -1,0 +1,111 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "MCP Tool Invocations & Latency",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 25 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "title": "Tool Calls per Tool",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (tool) (plm_plm_tool_calls_total)",
+          "legendFormat": "{{tool}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 15 },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "title": "Execution Latency per Tool (p95)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, tool) (rate(plm_plm_tool_duration_seconds_bucket[1m])))",
+          "legendFormat": "{{tool}} (p95)"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "title": "Failures per Tool",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (tool) (plm_plm_tool_errors_total)",
+          "legendFormat": "Failure: {{tool}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "id": 4,
+      "title": "Slowest Tools (Top Ranked by Average Latency)",
+      "type": "barchart",
+      "targets": [
+        {
+          "expr": "topk(5, sum by (tool) (rate(plm_plm_tool_duration_seconds_sum[5m])) / clamp_min(sum by (tool) (rate(plm_plm_tool_duration_seconds_count[5m])), 0.001))",
+          "legendFormat": "{{tool}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["mcp", "tools", "threadmind"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "2. MCP Tools (Calls, Latency, Failures & Slowest Tools)",
+  "uid": "plm-mcp-tools",
+  "version": 1
+}
+

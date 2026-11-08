@@ -1,0 +1,119 @@
+# =============================================================================
+# ThreadMind Mock PLM Observability Stack
+# Runs OTel Collector, Prometheus, Grafana Tempo, Grafana Loki, and Grafana
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # 1. OpenTelemetry Collector (Contrib)
+  # Receives traces, metrics, and logs via OTLP (4317 gRPC, 4318 HTTP)
+  # ===========================================================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    container_name: threadmind-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"     # OTLP gRPC receiver
+      - "4318:4318"     # OTLP HTTP receiver
+      - "8889:8889"     # Prometheus metrics exporter endpoint
+      - "13133:13133"   # Health check extension
+    depends_on:
+      - tempo
+      - loki
+    networks:
+      - threadmind-net
+
+  # ===========================================================================
+  # 2. Prometheus
+  # Time-series metrics engine scraping OTel Collector on port 8889
+  # ===========================================================================
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: threadmind-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - threadmind-net
+
+  # ===========================================================================
+  # 3. Grafana Tempo
+  # High-scale distributed tracing backend receiving spans from OTel Collector
+  # ===========================================================================
+  tempo:
+    image: grafana/tempo:2.7.0
+    container_name: threadmind-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"     # Tempo HTTP query API
+    networks:
+      - threadmind-net
+
+  # ===========================================================================
+  # 4. Grafana Loki
+  # High-performance structured log aggregation engine
+  # ===========================================================================
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: threadmind-loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"     # Loki HTTP push/query API
+    networks:
+      - threadmind-net
+
+  # ===========================================================================
+  # 5. Grafana UI
+  # Unified visual dashboard for Traces (Tempo), Metrics (Prometheus), and Logs (Loki)
+  # ===========================================================================
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: threadmind-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlSearch,tempoSearch,tempoBackendSearch
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    networks:
+      - threadmind-net
+
+volumes:
+  prometheus-data:
+  tempo-data:
+  loki-data:
+  grafana-data:
+
+networks:
+  threadmind-net:
+    driver: bridge

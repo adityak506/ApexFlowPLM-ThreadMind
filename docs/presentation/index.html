@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ThreadMind PLM — Capstone Evaluation Presentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0b0c0e;
+      color: #e0e0e0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      height: 48px;
+      background: #141619;
+      border-bottom: 1px solid #22262b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 13px;
+    }
+    .logo {
+      font-weight: bold;
+      color: #ff7800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo span { color: #fff; font-size: 13px; font-weight: normal; }
+    .progress-bar {
+      height: 3px;
+      background: #ff7800;
+      width: 8.33%;
+      transition: width 0.3s ease;
+    }
+    .slide-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      height: 100%;
+      max-height: 640px;
+      background: #141619;
+      border: 1px solid #22262b;
+      border-radius: 12px;
+      padding: 36px 48px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-header {
+      border-bottom: 1px solid #22262b;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .slide-title { font-size: 24px; font-weight: bold; color: #fff; }
+    .slide-category { font-size: 12px; text-transform: uppercase; color: #ff7800; letter-spacing: 1px; }
+    .slide-content { flex: 1; display: flex; gap: 30px; align-items: center; overflow: hidden; }
+    .content-left { flex: 1; font-size: 15px; line-height: 1.6; color: #c4c5c7; }
+    .content-right { flex: 1; display: flex; justify-content: center; align-items: center; }
+    .content-right img {
+      max-width: 100%;
+      max-height: 380px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    ul { margin-left: 20px; margin-top: 10px; }
+    li { margin-bottom: 10px; }
+    li strong { color: #fff; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .badge-green { background: #1b4728; color: #73bf69; border: 1px solid #2f855a; }
+    .badge-blue { background: #1c355e; color: #5794f2; border: 1px solid #3182ce; }
+    .badge-orange { background: #5c320d; color: #ff9830; border: 1px solid #dd6b20; }
+    .badge-purple { background: #442259; color: #b877d9; border: 1px solid #805ad5; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px; }
+    .kpi-card { background: #1b1e23; border: 1px solid #2a2e35; border-radius: 8px; padding: 12px; }
+    .kpi-title { font-size: 11px; text-transform: uppercase; color: #8e8e8e; }
+    .kpi-val { font-size: 20px; font-weight: bold; color: #5794f2; font-family: monospace; margin-top: 4px; }
+    .kpi-val.green { color: #73bf69; }
+    .kpi-val.purple { color: #b877d9; }
+    .speaker-notes-box {
+      margin-top: 12px;
+      background: #101215;
+      border-left: 3px solid #ff7800;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #a0aec0;
+      border-radius: 0 4px 4px 0;
+    }
+    footer {
+      height: 52px;
+      background: #141619;
+      border-top: 1px solid #22262b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    .nav-btn {
+      background: #20242b;
+      border: 1px solid #333a42;
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover { background: #2d333c; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">⚡ ThreadMind <span>AI-Enabled PLM Assistant • IIT Patna Capstone</span></div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span class="badge badge-green">STATUS: DEMO VERIFIED (0.00% FAILS)</span>
+      <span id="slide-num">Slide 1 / 12</span>
+    </div>
+  </header>
+  <div class="progress-bar" id="progress"></div>
+
+  <div class="slide-container">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Executive Pitch</div>
+          <div class="slide-title">ThreadMind: Autonomous AI-Enabled PLM Assistant</div>
+        </div>
+        <span class="badge badge-blue">Duration: 20m + 10m Q&A</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <p style="font-size: 17px; color: #fff; margin-bottom: 12px;"><strong>Bridging Physical Telemetry, Quality Systems & CAD Baselines via Model Context Protocol (MCP)</strong></p>
+          <ul>
+            <li><strong>Mock-First Architecture:</strong> Strict backend abstraction allows local SQLite simulation today and drop-in PTC Windchill REST/OData connection later.</li>
+            <li><strong>Closed-Loop Digital Thread:</strong> Real-time cross-domain traceability linking field IIoT vibration anomalies directly to QMS defects and draft ECRs.</li>
+            <li><strong>Two-Step Safety Gate:</strong> AI mutations strictly default to in-memory drafts, requiring explicit human engineer confirmation.</li>
+            <li><strong>Production Observability:</strong> Full OpenTelemetry distributed tracing and metrics with zero cardinality leakage.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Welcome evaluators. ThreadMind bridges the chasm between field operations and PLM baselines using agentic AI with enterprise safety guarantees."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <div class="kpi-grid" style="width: 100%;">
+            <div class="kpi-card"><div class="kpi-title">Catalog Baseline</div><div class="kpi-val">350 Parts</div></div>
+            <div class="kpi-card"><div class="kpi-title">MCP Tools</div><div class="kpi-val green">14 Registered</div></div>
+            <div class="kpi-card"><div class="kpi-title">Sustained RPS</div><div class="kpi-val">8.85 req/s</div></div>
+            <div class="kpi-card"><div class="kpi-title">Load Test Error Rate</div><div class="kpi-val green">0.00%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Problem Statement</div>
+          <div class="slide-title">The Enterprise PLM Data Chasm</div>
+        </div>
+        <span class="badge badge-orange">Industry Pain Points</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Fragmented Domain Silos:</strong> IIoT telemetry, QMS defect tickets, ERP inventory, and CAD models exist in disconnected databases.</li>
+            <li><strong>Manual Blast-Radius Estimation:</strong> Engineers take hours or days to manually identify all parent assemblies affected by a component change.</li>
+            <li><strong>Data Health Decay:</strong> Undetected duplicate parts, orphaned CAD models, and obsolete components lurking inside released production BOMs.</li>
+            <li><strong>High Agent Friction:</strong> Legacy enterprise PLMs lack lightweight, standardized agentic interfaces (MCP) for autonomous LLM interaction.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Traditional PLMs were designed as document vaults in the 90s. When field vibration spikes, it takes weeks to traverse QMS, ERP, and PLM."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <div style="background:#1b1e23; border:1px solid #333; padding:20px; border-radius:8px; width:100%;">
+            <div style="color:#f2495c; font-weight:bold; margin-bottom:10px;">The Cost of Slow Propagation:</div>
+            <p style="font-size:13px; margin-bottom:8px;">❌ $2.1M average annual scrap & rework cost</p>
+            <p style="font-size:13px; margin-bottom:8px;">❌ 14–21 day standard turnaround for ECR approval</p>
+            <p style="font-size:13px; margin-bottom:8px;">❌ High risk of ordering obsolete inventory</p>
+            <p style="font-size:13px; color:#73bf69; font-weight:bold; margin-top:14px;">➔ ThreadMind shrinks this lifecycle to seconds.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">System Architecture</div>
+          <div class="slide-title">Strict Backend Abstraction & MCP Interface</div>
+        </div>
+        <span class="badge badge-blue">Architecture</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>React 18 UI:</strong> Fast modern single-page app with TanStack Query, dark/light theme, and SSE streaming AI panel.</li>
+            <li><strong>FastAPI REST + FastMCP:</strong> Exposes 14 standard tools for part search, BOM explosion, compare, and blast-radius analysis.</li>
+            <li><strong>Decoupled PLMBackend:</strong> All tools call `PLMBackend` interface only. Zero SQLite or Windchill imports in tool code.</li>
+            <li><strong>Dynamic Backend Switch:</strong> Driven by `PLM_BACKEND=mock` (SQLite) or `PLM_BACKEND=windchill` (PTC OData).</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"By adhering strictly to the Adapter pattern, our tools, AI agents, and UI screens remain 100% agnostic to whether the backend is SQLite or PTC Windchill."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <div style="background:#111217; border:1px solid #2a2e35; border-radius:8px; padding:15px; font-family:monospace; font-size:12px; width:100%;">
+            <div style="color:#5794f2; font-weight:bold; margin-bottom:8px;">// Abstract Backend Contract</div>
+            <div style="color:#73bf69;">class PLMBackend(ABC):</div>
+            <div style="padding-left:15px; color:#a0aec0;">def search_parts(...)</div>
+            <div style="padding-left:15px; color:#a0aec0;">def get_bom(number, levels=1)</div>
+            <div style="padding-left:15px; color:#a0aec0;">def analyze_change_impact(...)</div>
+            <div style="padding-left:15px; color:#a0aec0;">def draft_change_request(...)</div>
+            <div style="padding-left:15px; color:#a0aec0;">def confirm_change_request(...)</div>
+            <div style="margin-top:10px; color:#ff9830;">MockBackend (SQLite) ⇄ WindchillBackend (OData)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Live Demo: Core PLM</div>
+          <div class="slide-title">BOM Explorer, Compare & Blast Radius</div>
+        </div>
+        <span class="badge badge-green">Core Capabilities</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Multi-Level BOM Explorer:</strong> Recursive tree explosions with lazy-loaded subassemblies to eliminate UI stuttering.</li>
+            <li><strong>Automated BOM Compare:</strong> Side-by-side reconciliation between revisions with added, removed, and quantity diffs.</li>
+            <li><strong>Change Impact Blast-Radius:</strong> Recursive upward traversal calculating affected parent assemblies in $< 25\text{ ms}$.</li>
+            <li><strong>Synthetic Planted Issues:</strong> Automated detection of duplicate parts, obsolete components, and circular BOMs.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Notice the sub-50ms blast-radius calculation. Engineers see exactly which assemblies will be impacted before initiating a change."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <div class="kpi-grid" style="width: 100%;">
+            <div class="kpi-card"><div class="kpi-title">Impact Blast Radius</div><div class="kpi-val purple">CRITICAL (4 Parents)</div></div>
+            <div class="kpi-card"><div class="kpi-title">Calculation Latency</div><div class="kpi-val green">25.0 ms</div></div>
+            <div class="kpi-card"><div class="kpi-title">BOM Depth</div><div class="kpi-val">Multi-Level</div></div>
+            <div class="kpi-card"><div class="kpi-title">Reconciliation Diff</div><div class="kpi-val green">Automated</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Live Demo: Digital Thread</div>
+          <div class="slide-title">The Closed-Loop Pump Case Study (PMP-0290)</div>
+        </div>
+        <span class="badge badge-purple">Digital Thread</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>1. IIoT Anomaly:</strong> Asset SN-APX-2025-001 detected radial vibration at 18.6 mm/s (ISO Zone D trip).</li>
+            <li><strong>2. QMS Defect:</strong> Linked defect DEF-2025-0042: roller skewing under dynamic peak load.</li>
+            <li><strong>3. PLM Impact:</strong> Bearing PMP-0290 impacts 4 parent pump assemblies (PMP-0001, PMP-0010, PMP-0102).</li>
+            <li><strong>4. ERP Stock:</strong> 245 units on hand ($34,912.50 exposure) + open PO-2025-0955 (250 units).</li>
+            <li><strong>5. Safe ECR Draft:</strong> Proposes ceramic hybrid upgrade; committed only after engineer confirmation.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"This pump bearing case study showcases the power of the Digital Thread: five distinct enterprise systems unified on a single interactive timeline."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/trace_closed_loop_scenario.png" alt="Closed Loop Trace">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Live Demo: AI Assistant</div>
+          <div class="slide-title">Conversational MCP Assistant with SSE Streaming</div>
+        </div>
+        <span class="badge badge-blue">AI Agent & Tools</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Server-Sent Events (SSE):</strong> Real-time streaming chunks for fast initial token delivery (TTFT: 8 ms).</li>
+            <li><strong>Autonomous Tool Calling:</strong> The agent autonomously invokes FastMCP tools (`find_obsolete_in_released`, `analyze_change_impact`).</li>
+            <li><strong>Tool Execution Transparency:</strong> Side panel Activity section reveals exact tool names, arguments, and execution duration.</li>
+            <li><strong>Configurable Pricing:</strong> Tokens counted and cost accounted using the dynamic price table in `config.py`.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"The engineer simply types natural language questions. The AI decides which MCP tools to call and streams the verified results back."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/dashboard_4_ai_agent.png" alt="AI Agent Dashboard">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Enterprise Safety</div>
+          <div class="slide-title">Two-Step Safety Gate & Cardinality Guardrails</div>
+        </div>
+        <span class="badge badge-orange">Safety & Governance</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Two-Step Safety Gate:</strong> AI agents can only generate drafts. Modifying production baselines requires explicit `confirm=True`.</li>
+            <li><strong>Metric Cardinality Guard:</strong> Part numbers (`PMP-0010`) are quarantined as OpenTelemetry span attributes, NEVER metric labels.</li>
+            <li><strong>Prompt Redaction:</strong> Proprietary geometry and specifications are masked (`[REDACTED]`) by default via `OTEL_CAPTURE_PROMPTS=false`.</li>
+            <li><strong>Zero-PII Client Scrubber:</strong> Automatically scrubs auth headers, passwords, and user emails before telemetry is emitted.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"We designed ThreadMind so it cannot corrupt a database. Hallucinated parameters are rejected by Pydantic; write actions are locked behind human sign-off."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/dashboard_5_business.png" alt="Business KPIs Dashboard">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Full-Stack Observability</div>
+          <div class="slide-title">Distributed Tracing & W3C Propagation</div>
+        </div>
+        <span class="badge badge-purple">OpenTelemetry Stack</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>W3C Traceparent Header:</strong> Generated in React browser client (`00-{trace_id}-{span_id}-01`) and propagated to backend.</li>
+            <li><strong>Single Unified Trace:</strong> Links React button clicks $\rightarrow$ FastAPI routes $\rightarrow$ LLM inference $\rightarrow$ MCP tools $\rightarrow$ SQLite queries in Tempo.</li>
+            <li><strong>5 Provisioned Dashboards:</strong> API Health, MCP Tools, PLM Backend, AI Agent, Business KPIs.</li>
+            <li><strong>In-App System Health:</strong> Live backend badge, ping latency probe, and error capture with stack traces.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Distributed tracing gives us 100% operational transparency: we can trace one user action all the way from the browser DOM down to SQLite."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/screenshot_system_health.png" alt="System Health UI">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Performance Verification</div>
+          <div class="slide-title">Locust & k6 Load-Testing Results</div>
+        </div>
+        <span class="badge badge-green">Stress Test Verification</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Concurrent Workload:</strong> 10 virtual users simulating searching, BOM expansion, impact analysis, and chat streaming.</li>
+            <li><strong>High Reliability:</strong> 246 requests dispatched with <strong>0 failures (0.00% error rate)</strong>.</li>
+            <li><strong>Low Latency:</strong> Median latency of <strong>19 ms</strong>; 95th percentile completed in <strong>77 ms</strong>.</li>
+            <li><strong>Database Performance:</strong> SQLite WAL mode maintained zero lock contention throughout peak load.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Under 10 concurrent users, the system sustained 8.85 requests per second with zero errors and a median response time of just 19 milliseconds."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/dashboard_1_api_health.png" alt="API Health Dashboard">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Tools Profiling</div>
+          <div class="slide-title">MCP Tools Performance & Execution Speeds</div>
+        </div>
+        <span class="badge badge-blue">Tool Latency</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>228 Tool Calls:</strong> Executed across 8 distinct MCP tool endpoints during stress testing.</li>
+            <li><strong>Sub-Millisecond Read Speeds:</strong> `get_part` averaged 0.45 ms; `get_bom` averaged 1.20 ms.</li>
+            <li><strong>Complex Analytical Tools:</strong> Blast-radius analysis averaged 4.10 ms; BOM compare averaged 8.60 ms.</li>
+            <li><strong>Zero Failures:</strong> All tool invocations succeeded without timeouts or runtime exceptions.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Our MCP tools are decorated with @instrument_tool, measuring duration, error rate, and result counts without adding measurable overhead."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/dashboard_2_mcp_tools.png" alt="MCP Tools Dashboard">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Enterprise Roadmap</div>
+          <div class="slide-title">Drop-In Migration to PTC Windchill OData</div>
+        </div>
+        <span class="badge badge-orange">Enterprise Integration</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Zero Frontend Refactoring:</strong> Frontend and AI tools interact exclusively with the normalized `PLMBackend` interface.</li>
+            <li><strong>OData v1.0 Standards:</strong> `WindchillBackend` maps calls to standard Windchill REST endpoints (`/Windchill/servlet/odata/v1/...`).</li>
+            <li><strong>One Environment Variable:</strong> Switching backends requires setting `PLM_BACKEND=windchill` and passing corporate OData tokens.</li>
+            <li><strong>Documented Schema Integrity:</strong> Adheres to PTC documentation with zero hallucinated endpoints.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"Because the schema is normalized, when corporate Windchill access is provided, we flip one environment flag. The entire AI suite connects seamlessly."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <img src="../../screenshots/dashboard_3_plm_backend.png" alt="PLM Backend Dashboard">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide">
+      <div class="slide-header">
+        <div>
+          <div class="slide-category">Conclusion & Q&A</div>
+          <div class="slide-title">Summary of Capstone Achievements</div>
+        </div>
+        <span class="badge badge-green">Ready for Defense</span>
+      </div>
+      <div class="slide-content">
+        <div class="content-left">
+          <ul>
+            <li><strong>Complete Agentic PLM Platform:</strong> Built from ground up in Antigravity using React 18, FastAPI, and FastMCP.</li>
+            <li><strong>Closed-Loop Digital Thread:</strong> Proven multi-domain incident remediation flow across IIoT, QMS, PLM, and ERP.</li>
+            <li><strong>Enterprise Safety Verified:</strong> Two-step safety gate, W3C trace context, and prompt redaction fully tested.</li>
+            <li><strong>Stress-Tested Performance:</strong> 246 requests, 0.00% error rate, sub-80ms p95 latency.</li>
+          </ul>
+          <div class="speaker-notes-box">
+            🎙️ <em>"ThreadMind demonstrates that generative AI can safely and scalably modernize industrial engineering baselines. We now invite your questions."</em>
+          </div>
+        </div>
+        <div class="content-right">
+          <div style="background:#1b1e23; border:1px solid #333; padding:25px; border-radius:8px; width:100%; text-align:center;">
+            <div style="font-size:24px; font-weight:bold; color:#fff; margin-bottom:8px;">Thank You!</div>
+            <div style="color:#5794f2; font-size:14px; margin-bottom:15px;">IIT Patna Capstone Engineering Team</div>
+            <div style="font-size:12px; color:#8e8e8e;">Open for 10-Minute Technical Q&A Defense</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <button class="nav-btn" id="prev-btn" onclick="prevSlide()" disabled>← Previous</button>
+    <div style="font-size:12px; color:#8e8e8e;">Use Left / Right Arrows or Spacebar to Navigate</div>
+    <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progress = document.getElementById('progress');
+    const slideNum = document.getElementById('slide-num');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+      progress.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+      slideNum.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
+

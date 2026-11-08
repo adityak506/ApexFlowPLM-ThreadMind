@@ -1,0 +1,147 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "LLM Tokens & Estimated Expenditure",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 30 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 1,
+      "title": "Tokens In vs Out",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (type) (plm_threadmind_llm_tokens_total)",
+          "legendFormat": "{{type}} tokens"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 2,
+      "title": "Estimated LLM Query Cost (USD)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(plm_threadmind_llm_estimated_cost_usd_total) or vector(0)",
+          "legendFormat": "Estimated Expenditure"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "id": 101,
+      "title": "Agent Execution Dynamics & Safety Metrics",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 15 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
+      "id": 3,
+      "title": "Tool Calls per Conversation",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (tool) (plm_threadmind_agent_tool_calls_total)",
+          "legendFormat": "{{tool}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 15 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
+      "id": 4,
+      "title": "Agent Reasoning Turns",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (model) (plm_threadmind_agent_turns_total)",
+          "legendFormat": "Turns ({{model}})"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
+      "id": 5,
+      "title": "Rejected Drafts & Max Turns Exceeded",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum by (reason) (plm_threadmind_agent_quality_issues_total) or vector(0)",
+          "legendFormat": "Reason: {{reason}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["ai", "agent", "llm", "threadmind"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "4. AI Agent (Tokens, Cost, Tool Calls, Turns & Quality)",
+  "uid": "plm-ai-agent",
+  "version": 1
+}
+

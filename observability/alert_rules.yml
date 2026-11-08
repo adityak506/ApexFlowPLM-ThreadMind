@@ -1,0 +1,59 @@
+# Prometheus Alerting Rules for ThreadMind PLM System
+groups:
+  - name: plm_alerts
+    rules:
+      # 1. API Error Rate above 5% for 5 minutes
+      - alert: HighAPIErrorRate
+        expr: >-
+          (
+            sum(rate(plm_plm_backend_errors_total[5m]))
+            /
+            clamp_min(sum(rate(plm_plm_backend_calls_total[5m])), 0.001)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          system: threadmind-plm
+        annotations:
+          summary: "API error rate exceeds 5% threshold"
+          description: "API/Backend error rate is currently at {{ $value | humanizePercentage }} (threshold: 5%) over the last 5 minutes."
+
+      # 2. p95 Tool Latency above 2 seconds
+      - alert: HighToolLatency
+        expr: >-
+          histogram_quantile(
+            0.95,
+            sum by (le, tool) (rate(plm_plm_tool_duration_seconds_bucket[5m]))
+          ) > 2.0
+        for: 2m
+        labels:
+          severity: warning
+          system: threadmind-plm
+        annotations:
+          summary: "MCP Tool p95 latency exceeded 2 seconds"
+          description: "MCP tool '{{ $labels.tool }}' p95 execution latency is {{ $value | humanizeDuration }} (threshold: 2s)."
+
+      # 3. Backend Errors above threshold
+      - alert: HighBackendErrors
+        expr: >-
+          sum by (backend, method) (rate(plm_plm_backend_errors_total[2m])) > 0.5
+        for: 1m
+        labels:
+          severity: critical
+          system: threadmind-plm
+        annotations:
+          summary: "Elevated backend errors detected"
+          description: "PLMBackend '{{ $labels.backend }}' method '{{ $labels.method }}' error rate is {{ $value | printf \"%.2f\" }} errors/sec."
+
+      # 4. LLM Cost per Hour above configurable limit ($10.00/hour)
+      - alert: HighLLMCostPerHour
+        expr: >-
+          sum(increase(plm_threadmind_llm_estimated_cost_usd_total[1h])) > 10.0
+        for: 5m
+        labels:
+          severity: warning
+          system: threadmind-plm
+        annotations:
+          summary: "LLM estimated expenditure exceeds hourly budget"
+          description: "LLM inference cost reached ${{ $value | printf \"%.2f\" }} over the last hour (budget threshold: $10.00/hr)."
+

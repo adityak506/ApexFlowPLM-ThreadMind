@@ -1,0 +1,87 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Business KPIs & Change Management",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 30 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "title": "Issues Detected by Type",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (type) (plm_threadmind_issues_detected_total)",
+          "legendFormat": "{{type}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 20 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "title": "Blast Radius Impact Analyses Run",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(plm_threadmind_impact_analyses_total)",
+          "legendFormat": "Impact Analyses"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 35 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "title": "ECR Drafts vs Confirmed vs Rejected",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (status) (plm_threadmind_ecr_drafts_total)",
+          "legendFormat": "ECR Status: {{status}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["business", "kpis", "ecr", "threadmind"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "5. Business KPIs (Issues Detected, Impact Blast Radius & ECR Funnel)",
+  "uid": "plm-business-kpis",
+  "version": 1
+}
+

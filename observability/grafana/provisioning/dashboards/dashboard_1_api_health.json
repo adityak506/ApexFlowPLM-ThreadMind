@@ -1,0 +1,95 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "API Health & Throughput",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 20 },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "title": "Request Rate by Endpoint",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (handler) (rate(http_server_duration_milliseconds_count[1m])) or sum by (tool) (rate(plm_plm_tool_calls_total[1m]))",
+          "legendFormat": "{{handler}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 15 },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "title": "p95 Latency by Endpoint",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, handler) (rate(http_server_duration_milliseconds_bucket[1m]))) or (histogram_quantile(0.95, sum by (le, tool) (rate(plm_plm_tool_duration_seconds_bucket[1m]))) * 1000)",
+          "legendFormat": "{{handler}} (p95)"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "drawStyle": "line", "fillOpacity": 25 },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "title": "Error Rate by Endpoint (%)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (handler) (rate(http_server_duration_milliseconds_count{status_code=~\"5..\"}[1m])) / sum by (handler) (rate(http_server_duration_milliseconds_count[1m])) or (sum by (tool) (rate(plm_plm_tool_errors_total[1m])) / clamp_min(sum by (tool) (rate(plm_plm_tool_calls_total[1m])), 0.001))",
+          "legendFormat": "{{handler}} error %"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["api", "health", "threadmind"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "1. API Health (Request Rate, Latency & Errors)",
+  "uid": "plm-api-health",
+  "version": 1
+}
+
