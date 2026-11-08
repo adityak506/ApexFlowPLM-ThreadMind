@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     PLM_BACKEND=mock \
     PLM_SQLITE_PATH=/app/data/plm_mock.db \
     PLM_SEED_ON_STARTUP=true \
-    CORS_ALLOW_ALL=false
+    CORS_ALLOW_ALL=true \
+    PYTHONPATH=/app:/app/src
 
 WORKDIR /app
 
@@ -26,19 +27,14 @@ RUN pip install --no-cache-dir --upgrade pip && \
 RUN mkdir -p /app/data
 COPY plm_mock.db /app/data/plm_mock.db
 
-# Copy backend application source
-COPY api.py api_schemas.py chat_service.py config.py \
-     plm_interface.py mock_backend.py windchill_backend.py \
-     erp_interface.py mock_erp_backend.py \
-     qms_interface.py mock_qms_backend.py \
-     iiot_interface.py mock_iiot_backend.py \
-     telemetry.py server.py ./
+# Copy all root Python modules (including validators.py, windchill_mapper.py, seed_data.py)
+COPY *.py ./
+COPY *.sql ./
 COPY src/ ./src/
 
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]
-

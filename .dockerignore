@@ -1,0 +1,29 @@
+# Git and CI/CD
+.git
+.github
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Frontend (not needed for backend Python image)
+ui/
+node_modules/
+
+# Test artifacts and screenshots
+tests/
+test-results/
+load_tests/
+docs/
+
+# Logs
+*.log
+observability.log
+audit.log
