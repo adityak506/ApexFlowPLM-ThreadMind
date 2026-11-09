@@ -30,6 +30,7 @@ RUN pip install --no-cache-dir -e . || true
 # 3. Create persistent data directory and copy pre-seeded database
 RUN mkdir -p /app/data
 COPY plm_mock.db /app/data/plm_mock.db
+COPY plm_mock.db /app/plm_mock.db
 
 # 4. Copy all root Python modules and SQL schemas
 COPY *.py ./
