@@ -24,9 +24,13 @@ services:
   - type: web
     name: apexflow-threadmind-frontend
     runtime: static
-    buildCommand: cd ui && npm install && npm run build
-    staticPublishPath: ui/dist
+    rootDir: ui
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
     routes:
       - type: rewrite
         source: /*
