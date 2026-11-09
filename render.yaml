@@ -1,6 +1,7 @@
 services:
+  # Backend FastAPI REST API & AI MCP Engine
   - type: web
-    name: apexflow-threadmind
+    name: apexflow-threadmind-backend
     runtime: python
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
@@ -18,3 +19,15 @@ services:
         value: "true"
       - key: PLM_SQLITE_PATH
         value: plm_mock.db
+
+  # Frontend React 18 + Vite Web Application
+  - type: static
+    name: apexflow-threadmind-frontend
+    buildCommand: cd ui && npm install && npm run build
+    staticPublishPath: ui/dist
+    plan: free
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
