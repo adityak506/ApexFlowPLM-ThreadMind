@@ -21,8 +21,9 @@ services:
         value: plm_mock.db
 
   # Frontend React 18 + Vite Web Application
-  - type: static
+  - type: web
     name: apexflow-threadmind-frontend
+    runtime: static
     buildCommand: cd ui && npm install && npm run build
     staticPublishPath: ui/dist
     plan: free
